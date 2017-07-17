@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Google Maps Example</title>
+</head>
+
+<style type="text/css">
+	#map-canvas {
+	    height: 360px;
+	    width: 100%;
+	}
+</style>
+
+<body>
+
+<input id="searchTextField" origin class="form-control" placeholder="Digite sua localização">
+    
+    <div id="map-canvas"></div>
+
+</body>
+
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+
+<script type="text/javascript">
+	var map;
+$.getScript("//maps.googleapis.com/maps/api/js?libraries=places&sensor=false&key='you_key'", function () {
+    var directionsService = new google.maps.DirectionsService;
+    var directionsDisplay = new google.maps.DirectionsRenderer;
+
+    var destination = GOOGLE_MAPS_LAT_LONG.split('|');
+
+    function initialize() {
+        map = new google.maps.Map(document.getElementById('map-canvas'), {
+            zoom: 16,
+            scrollwheel: false,
+            center: {lat: 1 * destination [0], lng: 1 * destination[1]}
+        });
+
+        directionsDisplay.setMap(map);
+
+        var newmarker = new google.maps.Marker({
+            map: map,
+            position: {lat: 1 * destination[0], lng: 1 * destination[1]}
+        });
+
+        var input = document.getElementById('searchTextField');
+        var autocomplete = new google.maps.places.Autocomplete(input);
+
+        google.maps.event.addListener(autocomplete, 'place_changed', function () {
+            var place = autocomplete.getPlace();
+            var origin = place.geometry.location;
+            calculateAndDisplayRoute(directionsService, directionsDisplay, origin);
+        });
+    }
+
+    function calculateAndDisplayRoute(directionsService, directionsDisplay, origin) {
+        directionsService.route({
+            origin: origin,
+            destination: {lat: 1 * destination[0], lng: 1 * destination[1]},
+            travelMode: google.maps.TravelMode.DRIVING
+        }, function (response, status) {
+            console.log(status)
+            if (status === google.maps.DirectionsStatus.OK) {
+                console.log(response)
+                directionsDisplay.setDirections(response);
+            } else {
+                window.alert('Nenhum resultado encontrado, tente outro endereço');
+            }
+        });
+    }
+
+    if (isIE() <= 9 && isIE() != false) {
+        initialize();
+    } else {
+        google.maps.event.addDomListener(window, 'load', initialize);
+    }
+});
+
+function isIE() {
+    var myNav = navigator.userAgent.toLowerCase();
+    return (myNav.indexOf('msie') != -1) ? parseInt(myNav.split('msie')[1]) : false;
+}
+
+</script>
+</html>
